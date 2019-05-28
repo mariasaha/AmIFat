@@ -10,11 +10,38 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   // Add vars and methods here
   //Adding the TextControllers from input fields
-  final TextEditingController _ageController = new TextEditingController();
   final TextEditingController _weightController = new TextEditingController();
   final TextEditingController _heightController = new TextEditingController();
-  double _finalResult = 0.0;
+  double bmiResult = 0.0;
+  double inches = 0.0;
+  String _interpret = "";
 
+  void handleLogic() {
+    setState(() {
+      double weight = double.parse(_weightController.text);
+      double height = double.parse(_heightController.text);
+      inches = height * 12;
+
+      if ((_weightController.text.isNotEmpty || weight > 0)
+          && (_heightController.text.isNotEmpty || height >0)) {
+        bmiResult = weight / (inches * inches) * 703;
+
+      // Am I Fat?
+      if (double.parse(bmiResult.toStringAsFixed(1)) <= 18.5) {
+        _interpret = "You need to eat more!";
+        print(_interpret);
+
+      }else if (double.parse(bmiResult.toStringAsFixed(1)) >= 18.5
+    && bmiResult < 25) {
+        _interpret = "You are not fat, my friend. Not yet, keep eating.";
+        print(_interpret);
+      }else if (double.parse(bmiResult.toStringAsFixed(1)) >= 25.0) {
+        _interpret = "Yes, you are fat. But you probably already knew that.";
+            print(_interpret);
+      }
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -52,17 +79,6 @@ class HomeState extends State<Home> {
                     child: new ListView(
                       children: <Widget>[
 
-                        //Text field to input age
-                        new TextField(
-                          controller: _ageController,
-                          keyboardType: TextInputType.number,
-                          decoration: new InputDecoration(
-                              labelText: 'Your Age:',
-                              hintText: 'Age',
-                              icon: new Icon(Icons.person_outline)
-                          ),
-                        ),
-
                         //Text field to input weight
                         new TextField(
                           controller: _weightController,
@@ -78,8 +94,8 @@ class HomeState extends State<Home> {
                           controller: _heightController,
                           keyboardType: TextInputType.number,
                           decoration: new InputDecoration(
-                              labelText: 'Your Height in Feet:',
-                              hintText: 'ex. 5.6',
+                              labelText: 'Your Height in feet:',
+                              hintText: 'ex. 6.2',
                               icon: new Icon(Icons.person_add)
                           ),
                         ),
@@ -87,9 +103,11 @@ class HomeState extends State<Home> {
                         new Padding(padding: new EdgeInsets.all(15.6)),
 
                         new Container(
+                          alignment: Alignment.center,
                           child: new RaisedButton(
-                            onPressed: null,
-                            color: Colors.deepPurpleAccent,
+                            onPressed: handleLogic,
+                                //() => debugPrint("Hello"),
+                            color: Colors.purpleAccent,
                             child: new Text(
                               "Am I Fat?",
                               style: new TextStyle(
@@ -99,7 +117,26 @@ class HomeState extends State<Home> {
                             ),
                           ),
                         ),
-
+                        new Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text("Your BMI is: ${bmiResult.toStringAsFixed(1)}",
+                            style: new TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 20.0
+                            ),),
+                            new Padding(padding: EdgeInsets.all(5.0),),
+                            new Text("$_interpret",
+                            style: new TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 20.0,
+                            ))
+                          ],
+                        ),
                       ],
                     )
                 ),
@@ -108,16 +145,4 @@ class HomeState extends State<Home> {
         )
     );
   }
-}
-//Add the logic methods and calculate results down here
-//step 1: multiply the weight in lbs by 0.45
-//step 2: multiply height in inches by 0.025 then Square it
-//step3: divide step 1 by step 2.
-double calculateBmiResult( String age, String weight, String height) {
-  var _stepOne = int.parse(weight) * 0.45;
-  var _stepTwo = int.parse(height) * 0.025;
-  var _stepThree = _stepTwo * _stepTwo;
-  var _endResult = _stepOne / _stepThree;
-  //debugPrint(_endResult.toString());
-  return _endResult;
 }
